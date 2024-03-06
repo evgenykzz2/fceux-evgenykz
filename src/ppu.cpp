@@ -61,7 +61,7 @@
 #define READPAL(ofs)    (PALRAM[(ofs)] & (GRAYSCALE ? 0x30 : 0xFF))
 #define READUPAL(ofs)   (UPALRAM[(ofs)] & (GRAYSCALE ? 0x30 : 0xFF))
 
-static void FetchSpriteData(void);
+static void FetchSpriteData(uint8& hit_16_low);
 static void RefreshLine(int lastpixel);
 static void RefreshSprites(void);
 static void CopySprites(uint8 *target);
@@ -1368,8 +1368,13 @@ static void DoLine(void) {
 
 	sphitx = 0x100;
 
+	uint8 hit_16_low = 0;
 	if (ScreenON || SpriteON)
-		FetchSpriteData();
+		FetchSpriteData(hit_16_low);
+	
+	//Emulate low sprite16 mmc3 bug
+	if (GameHBIRQHook && (ScreenON || SpriteON) && ((PPU[0] & 0x38) != 0x18) && hit_16_low)
+		GameHBIRQHook();
 
 	if (GameHBIRQHook && (ScreenON || SpriteON) && ((PPU[0] & 0x38) != 0x18)) {
 		X6502_Run(6);
@@ -1417,7 +1422,7 @@ void FCEUI_DisableSpriteLimitation(int a) {
 }
 
 static uint8 numsprites, SpriteBlurp;
-static void FetchSpriteData(void) {
+static void FetchSpriteData(uint8& hit_16_low) {
 	uint8 ns, sb;
 	SPR *spr;
 	uint8 H;
@@ -1448,7 +1453,11 @@ static void FetchSpriteData(void) {
 					t = (int)scanline - (spr->y);
 
 					if (Sprite16)
+					{
 						vadr = ((spr->no & 1) << 12) + ((spr->no & 0xFE) << 4);
+						if ((uint8)(spr->no & 1) == 0)
+							hit_16_low = 1;
+					}
 					else
 						vadr = (spr->no << 4) + vofs;
 

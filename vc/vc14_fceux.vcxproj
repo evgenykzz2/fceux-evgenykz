@@ -507,9 +507,11 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\boards\mmc2and4.cpp" />
     <ClCompile Include="..\src\boards\onebus.cpp" />
     <ClCompile Include="..\src\boards\pec-586.cpp" />
+    <ClCompile Include="..\src\boards\RetronicaUnrom.cpp" />
     <ClCompile Include="..\src\boards\rt-01.cpp" />
     <ClCompile Include="..\src\boards\sa-9602b.cpp" />
     <ClCompile Include="..\src\boards\sb-2000.cpp" />
+    <ClCompile Include="..\src\boards\TomasC4.cpp" />
     <ClCompile Include="..\src\boards\transformer.cpp" />
     <ClCompile Include="..\src\boards\unrom512.cpp" />
     <ClCompile Include="..\src\boards\vrc1.cpp" />

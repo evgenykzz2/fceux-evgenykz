@@ -568,7 +568,7 @@ BMAPPINGLocal bmap[] = {
 	{"TXC Policeman",		 36, Mapper36_Init},
 	{"PAL-ZZ SMB/TETRIS/NWC",37, Mapper37_Init},
 	{"Bit Corp.",			 38, Mapper38_Init},	// Crime Busters
-//	{"",					 39, Mapper39_Init},
+	{"TomasC4",				 39, TomasC4_Init},
 	{"SMB2j FDS",			 40, Mapper40_Init},
 	{"CALTRON 6-in-1",		 41, Mapper41_Init},
 	{"BIO MIRACLE FDS",		 42, Mapper42_Init},
@@ -1204,7 +1204,7 @@ static int iNES_Init(int num) {
 					case 45:
 					case 96:  CHRRAMSize = 32 * 1024; break;
 					case 176: CHRRAMSize = 128 * 1024; break;
-					default:  CHRRAMSize = 8 * 1024; break;
+					default:  CHRRAMSize = 256 * 1024; break;
 					}
 					iNESCart.vram_size = CHRRAMSize;
 				}

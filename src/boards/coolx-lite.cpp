@@ -329,10 +329,6 @@ void COOLX_Lite_Init(CartInfo *info)
     info->Close = COOLX_Lite_Close;
     info->Reset = COOLX_Lite_Power;
 
-    int chr_kb = 512;
-    CHRmask1[0] &= (chr_kb >> 10) - 1;
-    CHRmask2[0] &= (chr_kb >> 11) - 1;
-
     WRAM = (uint8*)FCEU_gmalloc(8 * 1024);
     SetupCartPRGMapping(0x10, WRAM, 8 * 1024, 1);
     AddExState(WRAM, 8 * 1024, 0, "WRAM");

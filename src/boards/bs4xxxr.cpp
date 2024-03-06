@@ -162,3 +162,76 @@ void BS4040R_Init(CartInfo *info) {
 	offset = 6;
 	BSXXXXR_Init(info);
 }
+
+
+//--------------------------------------------------------------------------------
+
+static uint8_t reg_6000;
+static uint8_t reg_7000;
+static uint8_t reg_latch;
+
+static void Dip27_Sync(void)
+{
+	if (reg_6000 & 0x80)	//AOROM
+	{
+		setprg32(0x8000, ((reg_latch & 0x0F) & (reg_6000 & 0x0F)) | reg_7000);
+		setmirror((reg_latch & 0x10) ? MI_1 : MI_0);
+	}
+	else //UNROM
+	{
+		const uint8_t mask = ((reg_6000 & 0x0F) << 1) | 1;
+		const uint8_t or = reg_7000 << 1;
+		setprg16(0x8000, (reg_latch & mask) | or);
+		setprg16(0xC000, (0xFF & mask) | or);
+		setmirror((reg_6000 & 0x40) ? MI_H : MI_V);
+	}
+}
+
+static DECLFW(Dip27_6000)
+{
+	if ((uint8_t)(reg_6000 & 0x10) == 0)
+	{
+		reg_6000 = V;
+		Dip27_Sync();
+	}
+}
+
+static DECLFW(Dip27_7000)
+{
+	if ((uint8_t)(reg_6000 & 0x10) == 0)
+	{
+		reg_7000 = V;
+		Dip27_Sync();
+	}
+}
+
+static DECLFW(Dip27_Latch)
+{
+	reg_latch = V;
+	Dip27_Sync();
+}
+
+static void Dip27_Power(void)
+{
+	reg_6000 = 0;
+	reg_7000 = 0;
+	reg_latch = 0;
+
+	SetWriteHandler(0x6000, 0x6fff, Dip27_6000);
+	SetWriteHandler(0x7000, 0x7ffF, Dip27_7000);
+	SetWriteHandler(0x8000, 0xffff, Dip27_Latch);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+	Dip27_Sync();
+	setchr8(0);
+}
+
+static void Dip27_Close(void)
+{
+}
+
+void Dip27_Init(CartInfo* info)
+{
+	info->Power = Dip27_Power;
+	info->Close = Dip27_Close;
+	info->Reset = Dip27_Power;
+}

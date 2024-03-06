@@ -166,6 +166,9 @@ void AA6023_Init(CartInfo *info);
 void COOLGIRL_Init(CartInfo* info);
 
 void COOLX_Lite_Init(CartInfo* info);
+void Dip27_Init(CartInfo* info);
+void TomasC4_Init(CartInfo* info);
+void RetronicaUnrom_Init(CartInfo* info);
 
 extern uint8 *UNIFchrrama;	// Meh.  So I can stop CHR RAM
 							// bank switcherooing with certain boards...

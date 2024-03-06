@@ -478,6 +478,10 @@ void MINDKIDS_Init(CartInfo* info) {
 	CommonInit(info, 1);
 }
 
+void AA6023B_Init(CartInfo* info) {
+	CommonInit(info, 1);
+}
+
 // For NES 2.0 loader
 void AA6023_Init(CartInfo* info) {
 	CommonInit(info, info->submapper);
