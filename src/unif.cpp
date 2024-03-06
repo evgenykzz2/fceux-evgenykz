@@ -478,6 +478,9 @@ static BMAPPING bmap[] = {
 	{ "COOLGIRL", COOLGIRL_Init, BMCFLAG_256KCHRR },
 	{ "JC-016-2", Mapper205_Init, 0 },
 
+
+	{ "COOLXm3", COOLX_Lite_Init, BMCFLAG_256KCHRR },
+
 	{ 0, 0, 0 }
 };
 
