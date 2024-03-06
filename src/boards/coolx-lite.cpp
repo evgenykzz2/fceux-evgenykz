@@ -98,12 +98,19 @@ static void CoolXLite_PgmUpdate(void)
         }
         else
         {
-            uint8_t pgm_mode = (MMC3_cmd >> 7) & 1;
+            uint8_t pgm_mode = (MMC3_cmd >> 6) & 1;
             if (pgm_mode == 0)
             {
                 setprg8(0x8000, (MMC3_reg[6] & bank_and) | bank_or);
                 setprg8(0xA000, (MMC3_reg[7] & bank_and) | bank_or);
                 setprg8(0xC000, (bank_and | bank_or) & (~1));
+                setprg8(0xE000, (bank_and | bank_or));
+            }
+            else
+            {
+                setprg8(0x8000, (bank_and | bank_or) & (~1));
+                setprg8(0xA000, (MMC3_reg[7] & bank_and) | bank_or);
+                setprg8(0xC000, (MMC3_reg[6] & bank_and) | bank_or);
                 setprg8(0xE000, (bank_and | bank_or));
             }
         }
@@ -140,16 +147,25 @@ static void CoolXLite_PgmUpdate(void)
 static void CoolXLite_ChrUpdate(void)
 {
     uint8_t coolx_vram_mask = (CoolX_reg4) & 0x1f;
-    uint8_t chr_mode = (MMC3_cmd >> 6) & 1;
+    uint8_t chr_mode = (MMC3_cmd >> 7) & 1;
+    uint32_t bank_and = (coolx_vram_mask << 3) | 0x07;
     if (chr_mode == 0)
-    {
-        uint32_t bank_and = (coolx_vram_mask << 3) | 0x07;
+    {   
         setchr2(0x0000, (MMC3_reg[0] & bank_and) >> 1);
         setchr2(0x0800, (MMC3_reg[1] & bank_and) >> 1);
         setchr1(0x1000, MMC3_reg[2] & bank_and);
         setchr1(0x1400, MMC3_reg[3] & bank_and);
         setchr1(0x1800, MMC3_reg[4] & bank_and);
         setchr1(0x1C00, MMC3_reg[5] & bank_and);
+    }
+    else
+    {
+        setchr1(0x0000, MMC3_reg[2] & bank_and);
+        setchr1(0x0400, MMC3_reg[3] & bank_and);
+        setchr1(0x0800, MMC3_reg[4] & bank_and);
+        setchr1(0x0C00, MMC3_reg[5] & bank_and);
+        setchr2(0x1000, (MMC3_reg[0] & bank_and) >> 1);
+        setchr2(0x1800, (MMC3_reg[1] & bank_and) >> 1);
     }
     //uint8_t coolx_mode = (CoolX_reg3 >> 2) & 3;
     //uint8_t coolx_lock_vram = CoolX_reg3 & 1;
@@ -205,6 +221,8 @@ static DECLFW(CoolXLite_Write_8000_FFFF)
         {
         case 0x8000:
             MMC3_cmd = V;
+            CoolXLite_PgmUpdate();
+            CoolXLite_ChrUpdate();
             break;
 
         case 0x8001:
@@ -266,6 +284,9 @@ static DECLFW(CoolXLite_Write_4FF0)
         CoolX_reg3 = V;
     else if (A == 0x4ff4)
         CoolX_reg4 = V;
+
+    uint8_t coolx_sram_page = (CoolX_reg3 >> 4) & 0x0F;
+    setprg8r(0x10, 0x6000, coolx_sram_page);
 
     CoolXLite_PgmUpdate();
     CoolXLite_ChrUpdate();
@@ -329,10 +350,14 @@ void COOLX_Lite_Init(CartInfo *info)
     info->Close = COOLX_Lite_Close;
     info->Reset = COOLX_Lite_Power;
 
-    WRAM = (uint8*)FCEU_gmalloc(8 * 1024);
-    SetupCartPRGMapping(0x10, WRAM, 8 * 1024, 1);
-    AddExState(WRAM, 8 * 1024, 0, "WRAM");
+    size_t wram_size = 128 * 1024;
+    WRAM = (uint8*)FCEU_gmalloc(wram_size);
+    SetupCartPRGMapping(0x10, WRAM, wram_size, 1);
+    AddExState(WRAM, wram_size, 0, "WRAM");
 
     AddExState(CoolXLite_StateRegs, ~0, 0, 0);
     GameHBIRQHook = CoolXLite_hb;
+
+    info->battery = 1;
+    info->addSaveGameBuf(WRAM, wram_size);
 }
