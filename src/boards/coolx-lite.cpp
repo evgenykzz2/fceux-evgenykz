@@ -274,15 +274,15 @@ static DECLFW(CoolXLite_Write_8000_FFFF)
 
 static DECLFW(CoolXLite_Write_4FF0)
 {
-    if (A == 0x4ff5)
+    if (A == 0x4ff5 || A == 0x4ffF)
         CoolX_reg5 = V;
-    else if (A == 0x4ff1)
+    else if (A == 0x4ff1 || A == 0x4FD7)
         CoolX_reg1 = V;
-    else if (A == 0x4ff2)
+    else if (A == 0x4ff2 || A == 0x4FDE)
         CoolX_reg2 = V;
-    else if (A == 0x4ff3)
+    else if (A == 0x4ff3 || A == 0x4FDF)
         CoolX_reg3 = V;
-    else if (A == 0x4ff4)
+    else if (A == 0x4ff4 || A == 0x4FF6)
         CoolX_reg4 = V;
 
     uint8_t coolx_sram_page = (CoolX_reg3 >> 4) & 0x0F;
@@ -309,7 +309,7 @@ static void COOLX_Lite_Power(void)
     CoolX_reg3 = 0;
     CoolX_reg4 = 0;
 
-    SetWriteHandler(0x4ff0, 0x4fff, CoolXLite_Write_4FF0);
+    SetWriteHandler(0x4fd0, 0x4fff, CoolXLite_Write_4FF0);
     SetWriteHandler(0x8000, 0xFFFF, CoolXLite_Write_8000_FFFF);
     SetReadHandler(0x8000, 0xFFFF, CartBR);
 

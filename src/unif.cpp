@@ -315,8 +315,10 @@ static int LoadCHR(FCEUFILE *fp) {
 #define BMCFLAG_FORCE4    0x01
 #define BMCFLAG_16KCHRR   0x02
 #define BMCFLAG_32KCHRR   0x04
-#define BMCFLAG_128KCHRR  0x08
-#define BMCFLAG_256KCHRR  0x10
+#define BMCFLAG_64KCHRR   0x08
+#define BMCFLAG_128KCHRR  0x10
+#define BMCFLAG_256KCHRR  0x20
+#define BMCFLAG_512KCHRR  0x40
 
 static BMAPPING bmap[] = {
 	{ "11160", BMC11160_Init, 0 },
@@ -482,6 +484,7 @@ static BMAPPING bmap[] = {
 	{ "DIP-2&7", Dip27_Init, 0 },
 	{ "Tomas-C4", TomasC4_Init, 0 },
 	{ "RetronicaUnrom", RetronicaUnrom_Init, 0 },
+	{ "COOLT4", COOLT4_Init, BMCFLAG_512KCHRR },
 
 	{ 0, 0, 0 }
 };
@@ -540,10 +543,14 @@ static int InitializeBoard(void) {
 					CHRRAMSize = 16;
 				else if (bmap[x].flags & BMCFLAG_32KCHRR)
 					CHRRAMSize = 32;
+				else if (bmap[x].flags & BMCFLAG_64KCHRR)
+					CHRRAMSize = 64;
 				else if (bmap[x].flags & BMCFLAG_128KCHRR)
 					CHRRAMSize = 128;
 				else if (bmap[x].flags & BMCFLAG_256KCHRR)
 					CHRRAMSize = 256;
+				else if (bmap[x].flags & BMCFLAG_512KCHRR)
+					CHRRAMSize = 512;
 				else
 					CHRRAMSize = 8;
 				CHRRAMSize <<= 10;

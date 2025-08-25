@@ -583,7 +583,7 @@ BMAPPINGLocal bmap[] = {
 	{"11-in-1 BALL SERIES",	 51, Mapper51_Init},	// 1993 year version
 	{"MMC3 BMC PIRATE D",	 52, Mapper52_Init},
 	{"SUPERVISION 16-in-1",	 53, Supervision16_Init},
-//	{"",					 54, Mapper54_Init},
+	{"Mmc3-4xMirroring",	 54, Mmc3x4Mirroring_Init},	//mmc3 with 4x mirroring
 //	{"",					 55, Mapper55_Init},
 //	{"",					 56, Mapper56_Init},
 	{"SIMBPLE BMC PIRATE A", 57, Mapper57_Init},
@@ -657,8 +657,8 @@ BMAPPINGLocal bmap[] = {
 	{"FDS LH32",			125, LH32_Init},
 //	{"",					126, Mapper126_Init},
 //	{"",					127, Mapper127_Init},
-//	{"",					128, Mapper128_Init},
-//	{"",					129, Mapper129_Init},
+	{"",					128, RetronicaRobo3_Init},
+	{"",					129, RetronicaNg2_Init},
 //	{"",					130, Mapper130_Init},
 //	{"",					131, Mapper131_Init},
 	{"TXC/MGENIUS 22111",	132, UNL22211_Init},

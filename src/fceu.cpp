@@ -119,6 +119,8 @@ bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
 static unsigned int pauseTimer = 0;
 
+int ram_monitor_read[2048];
+int ram_monitor_write[2048];
 
 FCEUGI::FCEUGI()
 	: filename(0),
@@ -371,6 +373,8 @@ uint8 *RAM;
 
 static void AllocBuffers() {
 	RAM = (uint8*)FCEU_gmalloc(0x800);
+	memset(ram_monitor_read, 0, sizeof(ram_monitor_read));
+	memset(ram_monitor_write, 0, sizeof(ram_monitor_write));
 }
 
 static void FreeBuffers() {
@@ -382,18 +386,23 @@ static void FreeBuffers() {
 uint8 PAL = 0;
 
 static DECLFW(BRAML) {
+	ram_monitor_write[A & 0x7FF]++;
 	RAM[A] = V;
 }
 
 static DECLFW(BRAMH) {
 	RAM[A & 0x7FF] = V;
+	ram_monitor_write[A & 0x7FF]++;
 }
 
-static DECLFR(ARAML) {
+static DECLFR(ARAML)
+{
+	ram_monitor_read[A & 0x7FF]++;
 	return RAM[A];
 }
 
 static DECLFR(ARAMH) {
+	ram_monitor_read[A & 0x7FF]++;
 	return RAM[A & 0x7FF];
 }
 

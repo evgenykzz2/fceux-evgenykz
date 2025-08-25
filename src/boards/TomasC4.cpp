@@ -44,7 +44,8 @@ static uint8 IRQCount;
 static uint8 IRQReload;
 static uint8 IRQLatch;
 static uint8 IRQa;
-
+static uint8 Mirroring4x;
+static uint8 ExtBank;
 //static uint8 EXPREGS[8];
 
 static SFORMAT MMC3_StateRegs[] =
@@ -57,6 +58,8 @@ static SFORMAT MMC3_StateRegs[] =
 	{ &IRQCount, 1, "IRQC" },
 	{ &IRQLatch, 1, "IRQL" },
 	{ &IRQa, 1, "IRQA" },
+	{ &Mirroring4x, 1, "Mirroring4x" },
+	{ &ExtBank, 1, "ExtBank" },
 	{ 0 }
 };
 
@@ -73,16 +76,24 @@ static DECLFW(TomasC4_Write)
 		switch (MMC3_cmd)
 		{
 		case 0x0:
-			setchr1(0x000, V);
+			if (ExtBank)
+				setchr1(0x000, V);
+			else
+				setchr2(0x000, V >> 1);
 			break;
 		case 0xA:
-			setchr1(0x400, V);
+			if (ExtBank)
+				setchr1(0x400, V);
 			break;
 		case 0x1:
-			setchr1(0x800, V);
+			if (ExtBank)
+				setchr1(0x800, V);
+			else
+				setchr2(0x800, V >> 1);
 			break;
 		case 0xB:
-			setchr1(0xC00, V);
+			if (ExtBank)
+				setchr1(0xC00, V);
 			break;
 		case 0x2:
 			setchr1(0x1000, V);
@@ -103,10 +114,12 @@ static DECLFW(TomasC4_Write)
 			setprg8(0xA000, V);
 			break;
 		case 0x8:
-			setprg8(0xC000, V);
+			if (ExtBank)
+				setprg8(0xC000, V);
 			break;
 		case 0x9:
-			setprg8(0xE000, V);
+			if (ExtBank)
+				setprg8(0xE000, V);
 			break;
 		default:
 			break;
@@ -115,7 +128,21 @@ static DECLFW(TomasC4_Write)
 
 	case 0xA000:
 		MMC3_mirroring = V;
-		setmirror((V & 1) ^ 1);
+		if (Mirroring4x == 0)
+		{
+			setmirror((V & 1) ^ 1);
+		}
+		else
+		{
+			if ((uint8_t)(MMC3_mirroring & 3) == 0)
+				setmirror(MI_V);
+			if ((uint8_t)(MMC3_mirroring & 3) == 1)
+				setmirror(MI_H);
+			if ((uint8_t)(MMC3_mirroring & 3) == 2)
+				setmirror(MI_0);
+			if ((uint8_t)(MMC3_mirroring & 3) == 3)
+				setmirror(MI_1);
+		}
 		break;
 	default:
 		break;
@@ -141,6 +168,8 @@ static void TomasC4_Power(void)
 	IRQReload = 0;
 	IRQLatch = 0;
 	IRQa = 0;
+	Mirroring4x = 0;
+	ExtBank = 1;
 	SetWriteHandler(0x8000, 0xBFFF, TomasC4_Write);
 	SetWriteHandler(0xC000, 0xFFFF, TomasC4_IRQWrite);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
@@ -179,6 +208,43 @@ void TomasC4_Init(CartInfo* info)
 	info->Reset = TomasC4_Power;
 
 	WRAM = (uint8*)FCEU_gmalloc(8*1024);
+	SetupCartPRGMapping(0x10, WRAM, 8 * 1024, 1);
+	AddExState(WRAM, 8 * 1024, 0, "WRAM");
+
+	AddExState(MMC3_StateRegs, ~0, 0, 0);
+	GameHBIRQHook = TomasC4_hb;
+}
+
+static void Mmc3x4Mirroring_Power(void)
+{
+	MMC3_cmd = 0;
+	MMC3_mirroring = 0;
+	IRQCount = 0;
+	IRQReload = 0;
+	IRQLatch = 0;
+	IRQa = 0;
+	Mirroring4x = 1;
+	ExtBank = 0;
+	SetWriteHandler(0x8000, 0xBFFF, TomasC4_Write);
+	SetWriteHandler(0xC000, 0xFFFF, TomasC4_IRQWrite);
+	SetReadHandler(0x8000, 0xFFFF, CartBR);
+
+	SetWriteHandler(0x6000, 0x7FFF, CartBW);
+	SetReadHandler(0x6000, 0x7FFF, CartBR);
+	setprg8r(0x10, 0x6000, 0);
+
+	setprg8(0xC000, 0xFE);
+	setprg8(0xE000, 0xFF);
+}
+
+
+void Mmc3x4Mirroring_Init(CartInfo* info)
+{
+	info->Power = Mmc3x4Mirroring_Power;
+	info->Close = TomasC4_Close;
+	info->Reset = Mmc3x4Mirroring_Power;
+
+	WRAM = (uint8*)FCEU_gmalloc(8 * 1024);
 	SetupCartPRGMapping(0x10, WRAM, 8 * 1024, 1);
 	AddExState(WRAM, 8 * 1024, 0, "WRAM");
 
