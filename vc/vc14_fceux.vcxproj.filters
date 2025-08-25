@@ -1146,6 +1146,12 @@
     <ClCompile Include="..\src\boards\RetronicaNg2.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\T4-vrc.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\t-111.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">

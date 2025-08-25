@@ -173,6 +173,8 @@ void RetronicaUnrom_Init(CartInfo* info);
 void RetronicaRobo3_Init(CartInfo* info);	//128
 void RetronicaNg2_Init(CartInfo* info);		//129
 void COOLT4_Init(CartInfo* info);
+void T4Vrc_Init(CartInfo* info);
+void T111_Init(CartInfo* info);
 
 extern uint8 *UNIFchrrama;	// Meh.  So I can stop CHR RAM
 							// bank switcherooing with certain boards...
